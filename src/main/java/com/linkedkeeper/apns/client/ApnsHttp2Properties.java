@@ -3,6 +3,7 @@ package com.linkedkeeper.apns.client;
 class ApnsHttp2Properties {
 
     static final long DEFAULT_WRITE_TIMEOUT_MILLIS = 20_000;
+    static final long DEFAULT_READ_TIMEOUT_MILLIS = 5_000;
     static final long DEFAULT_FLUSH_AFTER_IDLE_MILLIS = 50;
     static final int DEFAULT_MAX_UNFLUSHED_NOTIFICATIONS = 1280;
     static final String PRODUCTION_APNS_HOST = "api.push.apple.com";
