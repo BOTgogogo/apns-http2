@@ -19,6 +19,7 @@ import io.netty.handler.ssl.ApplicationProtocolConfig.Protocol;
 import io.netty.handler.ssl.ApplicationProtocolConfig.SelectedListenerFailureBehavior;
 import io.netty.handler.ssl.ApplicationProtocolConfig.SelectorFailureBehavior;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import io.netty.util.concurrent.*;
 import org.slf4j.Logger;
@@ -88,8 +89,9 @@ public class ApnsHttp2Client<T extends ApnsPushNotification> {
     }
 
     public void abortConnection(ErrorResponse errorResponse) throws Http2Exception {
+        logger.error("APNs server is shutdown,try to reconnect to anohter server" + errorResponse.getReason() + Http2Error.CONNECT_ERROR);
         disconnect();
-        throw new Http2Exception(Http2Error.CONNECT_ERROR, errorResponse.getReason());
+        // throw new Http2Exception(Http2Error.CONNECT_ERROR, errorResponse.getReason());
     }
 
     private static KeyStore loadKeyStore(final InputStream p12InputStream, final String password) throws SSLException {
@@ -176,7 +178,7 @@ public class ApnsHttp2Client<T extends ApnsPushNotification> {
             this.shouldShutDownEventLoopGroup = false;
         } else {
             this.bootstrap.group(new NioEventLoopGroup(1));
-            this.shouldShutDownEventLoopGroup = true;
+            this.shouldShutDownEventLoopGroup = false;
         }
         this.bootstrap.channel(this.getSocketChannelClass(this.bootstrap.config().group()));
         this.bootstrap.option(ChannelOption.TCP_NODELAY, true);
@@ -187,6 +189,9 @@ public class ApnsHttp2Client<T extends ApnsPushNotification> {
 
                 if (ApnsHttp2Properties.DEFAULT_WRITE_TIMEOUT_MILLIS > 0) {
                     pipeline.addLast(new WriteTimeoutHandler(ApnsHttp2Properties.DEFAULT_WRITE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
+                }
+                if (ApnsHttp2Properties.DEFAULT_READ_TIMEOUT_MILLIS > 0) {
+                    pipeline.addLast(new ReadTimeoutHandler(ApnsHttp2Properties.DEFAULT_READ_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
                 }
 
                 pipeline.addLast(sslContext.newHandler(channel.alloc()));
@@ -294,6 +299,7 @@ public class ApnsHttp2Client<T extends ApnsPushNotification> {
         final Future<Void> connectionReadyFuture;
 
         if (this.bootstrap.config().group().isShuttingDown() || this.bootstrap.config().group().isShutdown()) {
+            logger.error("Client's event loop group has been shut down and cannot be restarted.");
             connectionReadyFuture = new FailedFuture<>(GlobalEventExecutor.INSTANCE,
                     new IllegalStateException("Client's event loop group has been shut down and cannot be restarted."));
         } else {
