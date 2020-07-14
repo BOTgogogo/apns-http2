@@ -119,7 +119,7 @@ public class ApnsHttp2 {
         return this;
     }
 
-    private void stablishConnection() throws InterruptedException {
+    public void stablishConnection() throws InterruptedException {
         final Future<Void> connectFuture = sandboxEnvironment ? this.apnsHttp2Client.connectSandBox() : this.apnsHttp2Client.connectProduction();
         connectFuture.await();
     }
@@ -130,4 +130,13 @@ public class ApnsHttp2 {
             disconnectFuture.await();
         }
     }
+    
+    public ApnsHttp2Client<ApnsPushNotification> getApnsHttp2Client() {
+		return apnsHttp2Client;
+	}
+
+	public void setApnsHttp2Client(
+			ApnsHttp2Client<ApnsPushNotification> apnsHttp2Client) {
+		this.apnsHttp2Client = apnsHttp2Client;
+	}
 }
