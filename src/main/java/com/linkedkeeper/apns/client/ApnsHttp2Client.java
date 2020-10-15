@@ -19,7 +19,6 @@ import io.netty.handler.ssl.ApplicationProtocolConfig.Protocol;
 import io.netty.handler.ssl.ApplicationProtocolConfig.SelectedListenerFailureBehavior;
 import io.netty.handler.ssl.ApplicationProtocolConfig.SelectorFailureBehavior;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import io.netty.util.concurrent.*;
 import org.slf4j.Logger;
@@ -189,9 +188,6 @@ public class ApnsHttp2Client<T extends ApnsPushNotification> {
 
                 if (ApnsHttp2Properties.DEFAULT_WRITE_TIMEOUT_MILLIS > 0) {
                     pipeline.addLast(new WriteTimeoutHandler(ApnsHttp2Properties.DEFAULT_WRITE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
-                }
-                if (ApnsHttp2Properties.DEFAULT_READ_TIMEOUT_MILLIS > 0) {
-                    pipeline.addLast(new ReadTimeoutHandler(ApnsHttp2Properties.DEFAULT_READ_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
                 }
 
                 pipeline.addLast(sslContext.newHandler(channel.alloc()));
